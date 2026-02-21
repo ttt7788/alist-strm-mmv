@@ -22,24 +22,6 @@ Cron 定时任务：内置强大的定时调度器（支持按分钟、小时、
 
 实用工具箱：内置“批量替换域名”等高级工具，方便 Alist 服务器迁移。
 
-🛠️ 安装与部署 本项目已全面容器化，推荐使用 Docker / Docker Compose 进行一键部署。完美支持群晖、威联通、Unraid 以及 飞牛 OS (fnOS)。
-
-方式一：使用 Docker Compose (推荐) 在你的服务器或 NAS 上创建一个空文件夹，在其中新建 docker-compose.yml 文件，填入以下内容：
-
-services:
-  alist-strm:
-    build: .  # 添加这一行，指示 docker-compose 使用当前目录的 Dockerfile 构建镜像
-    container_name: alist-strm
-    restart: always
-    ports:
-      - "5000:5000"
-    volumes:
-      - ./config:/config
-      - ./logs:/app/logs
-      - ./data:/data
-      - ./:/app  # 调试专属：将当前本地目录挂载到容器内的 /app 目录，实现代码热更新
-    environment:
-      - TZ=Asia/Shanghai
 📖 快速上手指南 访问后台：浏览器打开 http://你的IP:5000。
 
 注册登录：首次运行需要注册一个管理员账号（所有数据均保存在本地 SQLite 中，绝对安全）。
