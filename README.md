@@ -26,16 +26,20 @@ Cron 定时任务：内置强大的定时调度器（支持按分钟、小时、
 
 方式一：使用 Docker Compose (推荐) 在你的服务器或 NAS 上创建一个空文件夹，在其中新建 docker-compose.yml 文件，填入以下内容：
 
-然后执行启动命令：
-
-方式二：飞牛 OS (fnOS) 专属安装 如果你使用的是飞牛私有云，可以通过以下步骤获得原生 App 体验：
-
-确保已在飞牛底层安装 fnpackup 脚手架。
-
-填入本镜像 akjehsmhq5/alist-strm:latest，映射对应的 /config 和 /data 目录。
-
-一键打包为 .fpk 文件后，直接在飞牛“应用中心”手动安装，即可在桌面生成快捷图标。
-
+services:
+  alist-strm:
+    build: .  # 添加这一行，指示 docker-compose 使用当前目录的 Dockerfile 构建镜像
+    container_name: alist-strm
+    restart: always
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./config:/config
+      - ./logs:/app/logs
+      - ./data:/data
+      - ./:/app  # 调试专属：将当前本地目录挂载到容器内的 /app 目录，实现代码热更新
+    environment:
+      - TZ=Asia/Shanghai
 📖 快速上手指南 访问后台：浏览器打开 http://你的IP:5000。
 
 注册登录：首次运行需要注册一个管理员账号（所有数据均保存在本地 SQLite 中，绝对安全）。
