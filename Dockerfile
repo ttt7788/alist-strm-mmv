@@ -1,43 +1,27 @@
-# 使用官方的 Python 镜像作为基础镜像
-FROM python:3.9-slim
+# 1. 使用 Python 官方轻量级镜像
+FROM python:3.10-slim
 
-# 设置工作目录
-WORKDIR /app
+# 2. 设置环境变量与时区 (确保定时任务不乱)
+ENV TZ=Asia/Shanghai
+ENV PYTHONUNBUFFERED=1
 
-# 安装必要的软件包，包括 curl, cron, tzdata 和 supervisord
-RUN apt-get update && apt-get install -y \
-    curl \
-    cron \
-    tzdata \
-    supervisor \
-    && apt-get clean \
+# 安装系统基础依赖（时区配置需要）
+RUN apt-get update && apt-get install -y tzdata \
+    && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone \
     && rm -rf /var/lib/apt/lists/*
 
-# 设置时区为中国
-ENV TZ=Asia/Shanghai
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+# 3. 设置工作目录
+WORKDIR /app
 
-# 将 requirements.txt 文件复制到工作目录
+# 4. 复制依赖清单并安装
 COPY requirements.txt .
-
-# 安装依赖包
 RUN pip install --no-cache-dir -r requirements.txt
 
+# 5. 复制代码到容器内
 COPY . .
 
-# 创建配置目录
-RUN mkdir /config
-
-# 设置环境变量
-ENV FLASK_APP=app.py
-ENV FLASK_ENV=production
-ENV CONFIG_PATH=/config
-
-# 暴露 Flask 默认运行端口
+# 6. 声明 Web 运行端口
 EXPOSE 5000
 
-# 复制 supervisord 配置文件
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
-# 使用 supervisord 启动
-CMD ["/usr/bin/supervisord"]
+# 7. 终极启动命令：使用 Gunicorn 启动 Flask，启用单进程多线程模式（完美兼容定时任务）
+CMD ["gunicorn", "-w", "1", "--threads", "4", "-b", "0.0.0.0:5000", "app:app"]
